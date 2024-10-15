@@ -4,6 +4,7 @@ using LMT.Api.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace LMT.Api.Controllers.v1
 {
@@ -78,7 +79,6 @@ namespace LMT.Api.Controllers.v1
         [Authorize]
         [HttpPost]
         [Route("revoke/{refreshToken}")]
-
         public async Task<IActionResult> RevokeAsync(string refreshToken)
         {
             await _authService.RevokeAsync(refreshToken);
@@ -114,6 +114,36 @@ namespace LMT.Api.Controllers.v1
             {
                 return BadRequest(new { message = "Failed to delete user" });
             }
+        }
+
+        [HttpPut("edit-user")]
+        public async Task<IActionResult> EditUser([FromBody] EditUserRequest request)
+        {
+            // Validate the request model
+            if (!ModelState.IsValid)
+            {
+                return BadRequest("Invalid data.");
+            }
+
+            // Find the user by ID
+            var user = await _authService.GetUserByIdAsync(request.UserId);
+            if (user == null)
+            {
+                return NotFound("User not found.");
+            }
+
+            // Update user properties
+            user.UserName = request.Username;
+            user.PhoneNumber = request.PhoneNumber;
+
+            // Call the repository to edit the user
+            var result = await _authService.EditUserAsync(user);
+            if (!result)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Error updating user.");
+            }
+
+            return Ok("User updated successfully.");
         }
     }
 }

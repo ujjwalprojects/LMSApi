@@ -71,7 +71,9 @@ namespace LMT.Api.Services
         }
         public async Task<TokenResponse> AuthenticateUserAsync(LoginRequest loginRequest)
         {
-            var user = await _userManager.FindByNameAsync(loginRequest.Username);
+            var user = await _userManager.FindByNameAsync(loginRequest.Username)
+                ?? await _userManager.FindByEmailAsync(loginRequest.Username); 
+
             if (user != null && await _userManager.CheckPasswordAsync(user, loginRequest.Password))
             {
                 var authClaims = await GenerateClaimsAsync(user);
@@ -101,7 +103,8 @@ namespace LMT.Api.Services
                     profileName = user.UserName,
                     email = user.Email,
                     userName = user.UserName,
-                    userId = user.Id
+                    userId = user.Id,
+                    phonenumber = user.PhoneNumber
                 };
             }
             return null;
@@ -277,7 +280,6 @@ namespace LMT.Api.Services
             var users = await _dbContext.Users.ToListAsync(); // Assuming your DbContext has a DbSet<ApplicationUser> Users
             return _mapper.Map<List<UserListDTO>>(users);
         }
-
         public async Task<bool> DeleteUserAsync(string userId)
         {
             var user = await _userManager.FindByIdAsync(userId);
@@ -293,6 +295,17 @@ namespace LMT.Api.Services
             }
             var deleteResult = await _userManager.DeleteAsync(user);
             return deleteResult.Succeeded;
+        }
+
+        public async Task<ApplicationUser> GetUserByIdAsync(string userId)
+        {
+            return await _userManager.FindByIdAsync(userId);
+        }
+
+        public async Task<bool> EditUserAsync(ApplicationUser user)
+        {
+            var result = await _userManager.UpdateAsync(user);
+            return result.Succeeded; 
         }
     }
 }
