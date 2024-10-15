@@ -37,6 +37,15 @@ namespace LMT.Api.Controllers.v1
             return Ok(_mapper.Map<List<T_TaskAllocationFormsDTO>>(taskAllocationForms));
         }
 
+        [HttpGet("task-list")]
+        public async Task<ActionResult<List<T_TaskAllocationFormsDTO>>> GetTaskAllocationFormsWithSearch(string? searchText, int? month, int? year, DateTime? date)
+        {
+            _logger.LogInformation("Method GetTaskAllocationFormsWithSearch invoked.");
+
+            var taskAllocationForms = await _taskAllocationFormRepository.GetAllTaskAllocationFormsAsync(searchText, month, year, date);
+            return Ok(_mapper.Map<List<T_TaskAllocationFormsDTO>>(taskAllocationForms));
+        }
+
         // GET: api/TaskAllocationForm/id
         [HttpGet("{id}")]
         public async Task<ActionResult<T_TaskAllocationFormsDTO>> GetTaskAllocationForm(string id)

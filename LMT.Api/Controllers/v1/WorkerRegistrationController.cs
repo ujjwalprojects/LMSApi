@@ -74,7 +74,7 @@ namespace LMT.Api.Controllers.v1
         {
             _logger.LogInformation($"Method PutWorkerRegistration({workerRegistrationDto.Worker_Reg_Id}) invoked.");
 
-            if (workerRegistrationDto.Worker_Reg_Id != null)
+            if (workerRegistrationDto.Worker_Reg_Id == "")
             {
                 throw new BadHttpRequestException($"WorkerRegistration with Id {workerRegistrationDto.Worker_Reg_Id} not found.", StatusCodes.Status400BadRequest);
             }

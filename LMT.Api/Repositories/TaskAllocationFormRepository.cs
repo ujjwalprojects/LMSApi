@@ -4,6 +4,7 @@ using LMT.Api.Data;
 using LMT.Api.IDGenerators;
 using Microsoft.EntityFrameworkCore;
 using LMT.Api.DTOs;
+using System.Linq;
 
 namespace LMT.Api.Repositories
 {
@@ -39,7 +40,19 @@ namespace LMT.Api.Repositories
 
         public async Task<List<T_TaskAllocationForms>> GetAllTaskAllocationFormsAsync()
         {
-            return await _dbContext.T_TaskAllocationForms.ToListAsync();
+            return await _dbContext.T_TaskAllocationForms.OrderByDescending(x=>x.Task_Assigned_Date).ToListAsync();
+        }
+
+        public async Task<List<T_TaskAllocationForms>> GetAllTaskAllocationFormsAsync(string? searchText, int? month, int? year, DateTime? date)
+        {
+            if (string.IsNullOrEmpty(searchText) && month == null && year == null && date == null)
+            {
+                return await _dbContext.T_TaskAllocationForms.ToListAsync();
+            }
+            return await _dbContext.T_TaskAllocationForms
+                .Where(c => c.Task_Name.Contains(searchText) || c.Task_Id.Contains(searchText) || c.Task_Status.Contains(searchText)
+                || c.Task_Creation_Date == date || c.Task_Creation_Date.Year == year || c.Task_Creation_Date.Month == month)
+                .ToListAsync();
         }
 
         public async Task<IEnumerable<GetTaskAllocationCountDTO>> GetTaskAllocationCountDTOs(string? userId)
@@ -58,7 +71,8 @@ namespace LMT.Api.Repositories
         public async Task<IEnumerable<GetTaskWorkersMapDTO>> getTaskWorkersMapDTOsAsync(string taskId, string? searchText)
         {
             var result = await _dbContext.GetTaskWorkersMapDTO
-                 .FromSqlRaw("EXEC [dbo].[SP_GetWorkersMappedWithTasks] @TaskID = {0}, @SearchTerm = {1}", taskId ?? (object)DBNull.Value, searchText ?? (object)DBNull.Value)
+                 .FromSqlRaw("EXEC [dbo].[SP_GetWorkersMappedWithTasks] @TaskID = {0}, @SearchTerm = {1}", 
+                    taskId ?? (object)DBNull.Value, searchText ?? (object)DBNull.Value)
                 .ToListAsync();
 
             return result;

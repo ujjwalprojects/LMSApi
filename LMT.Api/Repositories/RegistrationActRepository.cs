@@ -47,8 +47,17 @@ namespace LMT.Api.Repositories
 
         public async Task UpdateRegistrationActAsync(M_RegistrationActs registrationAct)
         {
-            _dbContext.Entry(registrationAct).State = EntityState.Modified;
-            await _dbContext.SaveChangesAsync();
+            try
+            {
+                _dbContext.Entry(registrationAct).State = EntityState.Modified;
+                await _dbContext.SaveChangesAsync();
+
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
         }
     }
 }
