@@ -66,5 +66,14 @@ namespace LMT.Api.Repositories
             _dbContext.Entry(establishmentRegistration).State = EntityState.Modified;
             await _dbContext.SaveChangesAsync();
         }
+
+        public async Task<IEnumerable<GetEstablishmentRegistrationReportDTO>> GetEstablishmentRegistrationReportDTO(int? distId)
+        {
+            var result = await _dbContext.GetEstablishmentRegistrationReportDTOs
+              .FromSqlRaw("EXEC [dbo].[SP_GetEstablishmentReport]  @DistrictId = {0}"
+                   , distId ?? (object)DBNull.Value)
+              .ToListAsync();
+            return result;
+        }
     }
 }

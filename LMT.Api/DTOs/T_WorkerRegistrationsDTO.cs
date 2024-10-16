@@ -33,5 +33,6 @@
         public string? Worker_Health_Status { get; set; }
         public string? Worker_Registration_Type { get; set; }
         public string? Worker_Employment_Type { get; set; }
+        public string Estd_LastUpdated_By { get; set; }
     }
 }

@@ -18,5 +18,7 @@ namespace LMT.Api.Entities
         public string? Estd_Remarks { get; set; }
         public string? Estd_Description { get; set; }
         public bool Estd_IsRegistered { get; set; }
+        public int Estd_District_Id { get; set; }
+        public string Estd_LastUpdated_By { get; set; }
     }
 }

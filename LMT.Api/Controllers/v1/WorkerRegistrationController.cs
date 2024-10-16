@@ -123,7 +123,7 @@ namespace LMT.Api.Controllers.v1
             var result = await _workerRegistrationRepository.GetWorkerRegistrationCountDTO(userId);
 
             if (result == null || !result.Any())
-                return NotFound();
+                return NotFound("No Results Found");
 
             return Ok(result);
         }
@@ -135,7 +135,7 @@ namespace LMT.Api.Controllers.v1
             var result = await _workerRegistrationRepository.GetWorkerRegistrationReportDTO(estdId,distId);
 
             if (result == null || !result.Any())
-                return NotFound();
+                return NotFound("No Results Found");
 
             return Ok(result);
         }

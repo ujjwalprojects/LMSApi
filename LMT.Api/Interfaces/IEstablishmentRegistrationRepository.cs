@@ -13,6 +13,7 @@ namespace LMT.Api.Interfaces
         Task UpdateEstablishmentRegistrationAsync(T_EstablishmentRegistrations establishmentRegistration);
         Task DeleteEstablishmentRegistrationAsync(int establishmentRegistrationId);
         Task <IEnumerable<GetEstablishmentCountDTO>> GetEstablishmentCountDTOs(string? userId);
+        Task<IEnumerable<GetEstablishmentRegistrationReportDTO>> GetEstablishmentRegistrationReportDTO(int? distId);
     }
 
 }

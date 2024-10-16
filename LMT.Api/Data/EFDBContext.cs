@@ -32,6 +32,7 @@ namespace LMT.Api.Data
         public DbSet<GetWorkerRegistrationCountDTO> GetWorkerRegistrationCountDTOs { get; set; }
         public DbSet<GetTaskAllocationCountDTO> GetTaskAllocationCountDTOs { get; set; }
         public DbSet<GetWorkerRegistrationReportDTO> GetWorkerRegistrationReportDTOs { get; set; }
+        public DbSet<GetEstablishmentRegistrationReportDTO> GetEstablishmentRegistrationReportDTOs { get; set; }
 
 
 
@@ -44,6 +45,7 @@ namespace LMT.Api.Data
             modelBuilder.Entity<GetWorkerRegistrationCountDTO>().HasNoKey();
             modelBuilder.Entity<GetTaskAllocationCountDTO>().HasNoKey();
             modelBuilder.Entity<GetWorkerRegistrationReportDTO>().HasNoKey();
+            modelBuilder.Entity<GetEstablishmentRegistrationReportDTO>().HasNoKey();
 
             // Other entity configurations
             base.OnModelCreating(modelBuilder);

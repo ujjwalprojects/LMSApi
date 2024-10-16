@@ -5,6 +5,7 @@ using LMT.Api.Interfaces;
 using LMT.Api.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using LMT.Api.Repositories;
 
 namespace LMT.Api.Controllers.v1
 {
@@ -127,6 +128,18 @@ namespace LMT.Api.Controllers.v1
             await _establishmentRegistrationRepository.DeleteEstablishmentRegistrationAsync(id);
 
             return NoContent();
+        }
+
+        [HttpGet("establishment-registration-report")]
+        public async Task<ActionResult<IEnumerable<GetEstablishmentRegistrationReportDTO>>> GetEstablishmentRegistrationReport(int? distId)
+        {
+            _logger.LogInformation("Method GetWorkerRegistrationReport by searchText invoked.");
+            var result = await _establishmentRegistrationRepository.GetEstablishmentRegistrationReportDTO(distId);
+
+            if (result == null || !result.Any())
+                return NotFound("No Results Found");
+
+            return Ok(result);
         }
 
         private async Task<bool> EstablishmentRegistrationExists(int id)
