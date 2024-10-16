@@ -296,12 +296,10 @@ namespace LMT.Api.Services
             var deleteResult = await _userManager.DeleteAsync(user);
             return deleteResult.Succeeded;
         }
-
         public async Task<ApplicationUser> GetUserByIdAsync(string userId)
         {
             return await _userManager.FindByIdAsync(userId);
         }
-
         public async Task<bool> EditUserAsync(ApplicationUser user)
         {
             var result = await _userManager.UpdateAsync(user);

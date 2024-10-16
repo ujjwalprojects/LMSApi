@@ -14,6 +14,7 @@ namespace LMT.Api.Entities
         public string Worker_Gender { get; set; } = string.Empty;
         public string Worker_Contact_No { get; set; } = string.Empty;
         public int Worker_Present_State_Id { get; set; }
+        public int Worker_Present_District_Id { get; set; }
         public string Worker_Persent_Address { get; set; } = string.Empty;
         public int Worker_Permanent_State_Id { get; set; }
         public string Worker_Permanent_Address { get; set; } = string.Empty;

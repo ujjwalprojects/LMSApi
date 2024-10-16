@@ -77,11 +77,12 @@ namespace LMT.Api.Repositories
             return result;
         }
 
-        public async Task<IEnumerable<GetWorkerRegistrationReportDTO>> GetWorkerRegistrationReportDTO(string? estdId)
+        public async Task<IEnumerable<GetWorkerRegistrationReportDTO>> GetWorkerRegistrationReportDTO(int? estdId, int? distId)
         {
             var result = await _dbContext.GetWorkerRegistrationReportDTOs
-           .FromSqlRaw("EXEC [dbo].[SP_GetWorkersReport] @EstdId = {0}", estdId ?? (object)DBNull.Value)
-           .ToListAsync();
+              .FromSqlRaw("EXEC [dbo].[SP_GetWorkersReport] @EstdId = {0} , @DistrictId = {1}"
+                   , estdId ?? (object)DBNull.Value, distId ?? (object)DBNull.Value)
+              .ToListAsync();
             return result;
         }
 

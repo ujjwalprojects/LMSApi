@@ -2,7 +2,7 @@
 {
     public class GetWorkerRegistrationReportDTO
     {
-        public int Worker_Reg_Id { get; set; }
+        public string Worker_Reg_Id { get; set; }
         public string Worker_Name { get; set; }
         public string Worker_Aadhaar_No { get; set; }
         public string Worker_VoterCard_No { get; set; }
@@ -11,6 +11,7 @@
         public string Worker_Gender { get; set; }
         public string Worker_Contact_No { get; set; }
         public string Present_StateName { get; set; }
+        public string Present_DistrictName { get; set; }
         public string Worker_Persent_Address { get; set; }
         public string Permanent_StateName { get; set; }
         public string Worker_Permanent_Address { get; set; }

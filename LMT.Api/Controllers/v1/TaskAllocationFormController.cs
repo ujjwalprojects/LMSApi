@@ -82,15 +82,15 @@ namespace LMT.Api.Controllers.v1
             return Ok("Task Workers Mapping Saved.");
         }
 
-        // PUT: api/TaskAllocationForm/id
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutTaskAllocationForm(string id, T_TaskAllocationFormsDTO taskAllocationFormDto)
+        // PUT: api/TaskAllocationForm
+        [HttpPut]
+        public async Task<IActionResult> PutTaskAllocationForm(T_TaskAllocationFormsDTO taskAllocationFormDto)
         {
-            _logger.LogInformation($"Method PutTaskAllocationForm({id}) invoked.");
+            _logger.LogInformation($"Method PutTaskAllocationForm({taskAllocationFormDto.Task_Id}) invoked.");
 
-            if (id != taskAllocationFormDto.Task_Id)
+            if (taskAllocationFormDto.Task_Id == null)
             {
-                throw new BadHttpRequestException($"TaskAllocationForm with Id {id} not found.", StatusCodes.Status400BadRequest);
+                throw new BadHttpRequestException($"TaskAllocationForm with Id {taskAllocationFormDto.Task_Id} not found.", StatusCodes.Status400BadRequest);
             }
 
             var taskAllocationForm = _mapper.Map<T_TaskAllocationForms>(taskAllocationFormDto);
@@ -100,7 +100,7 @@ namespace LMT.Api.Controllers.v1
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!await TaskAllocationFormExists(id))
+                if (!await TaskAllocationFormExists(taskAllocationFormDto.Task_Id))
                 {
                     return NotFound();
                 }
