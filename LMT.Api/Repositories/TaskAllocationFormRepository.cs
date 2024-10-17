@@ -80,17 +80,23 @@ namespace LMT.Api.Repositories
 
         public async Task SaveTaskWorkMappings(T_TaskWorkerMapperManageDTO t_TaskWorkerMapperManageDTO)
         {
-            var taskWorkers = t_TaskWorkerMapperManageDTO.TaskWorkerMap.Select(dto => new T_TaskWorkerMappers
-            {
-                TaskID = dto.TaskID,
-                Worker_Reg_Id = dto.Worker_Reg_Id
-            }).ToList();
+            
+                var taskId = t_TaskWorkerMapperManageDTO.TaskWorkerMap.First().TaskID;
 
+                var existingMappings = _dbContext.T_TaskWorkerMappers
+                      .Where(t => t.TaskID == taskId)
+                      .ToList();
 
+                _dbContext.T_TaskWorkerMappers.RemoveRange(existingMappings);
 
-            _dbContext.T_TaskWorkerMappers.AddRange(taskWorkers);
-            await _dbContext.SaveChangesAsync();
+                var taskWorkers = t_TaskWorkerMapperManageDTO.TaskWorkerMap.Select(dto => new T_TaskWorkerMappers
+                {
+                    TaskID = dto.TaskID,
+                    Worker_Reg_Id = dto.Worker_Reg_Id
+                }).ToList();
 
+                _dbContext.T_TaskWorkerMappers.AddRange(taskWorkers);
+                await _dbContext.SaveChangesAsync();
         }
 
         public async Task UpdateTaskAllocationFormAsync(T_TaskAllocationForms taskAllocationForm)
