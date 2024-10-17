@@ -72,7 +72,8 @@ namespace LMT.Api.Services
         public async Task<TokenResponse> AuthenticateUserAsync(LoginRequest loginRequest)
         {
             var user = await _userManager.FindByNameAsync(loginRequest.Username)
-                ?? await _userManager.FindByEmailAsync(loginRequest.Username); 
+                ?? await _userManager.FindByEmailAsync(loginRequest.Username);
+         
 
             if (user != null && await _userManager.CheckPasswordAsync(user, loginRequest.Password))
             {

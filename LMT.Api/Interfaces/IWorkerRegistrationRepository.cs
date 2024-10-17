@@ -12,7 +12,7 @@ namespace LMT.Api.Interfaces
         Task UpdateWorkerRegistrationAsync(T_WorkerRegistrations workerRegistration);
         Task DeleteWorkerRegistrationAsync(string workerRegistrationId);
         Task<IEnumerable<GetWorkerRegistrationCountDTO>> GetWorkerRegistrationCountDTO(string? userId);
-        Task<IEnumerable<GetWorkerRegistrationReportDTO>> GetWorkerRegistrationReportDTO(int? estdId, int? distId);
+        Task<IEnumerable<GetWorkerRegistrationReportDTO>> GetWorkerRegistrationReportDTO(int? estdId, int? distId, string? independentWorker);
     }
 
 }

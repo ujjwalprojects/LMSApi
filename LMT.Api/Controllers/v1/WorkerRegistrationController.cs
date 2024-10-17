@@ -129,10 +129,10 @@ namespace LMT.Api.Controllers.v1
         }
 
         [HttpGet("worker-registration-report")]
-        public async Task<ActionResult<IEnumerable<GetWorkerRegistrationReportDTO>>> GetWorkerRegistrationReport(int? estdId, int? distId)
+        public async Task<ActionResult<IEnumerable<GetWorkerRegistrationReportDTO>>> GetWorkerRegistrationReport(int? estdId, int? distId, string? independentWorker)
         {
             _logger.LogInformation("Method GetWorkerRegistrationReport by searchText invoked.");
-            var result = await _workerRegistrationRepository.GetWorkerRegistrationReportDTO(estdId,distId);
+            var result = await _workerRegistrationRepository.GetWorkerRegistrationReportDTO(estdId,distId,independentWorker);
 
             if (result == null || !result.Any())
                 return NotFound("No Results Found");

@@ -77,13 +77,18 @@ namespace LMT.Api.Repositories
             return result;
         }
 
-        public async Task<IEnumerable<GetWorkerRegistrationReportDTO>> GetWorkerRegistrationReportDTO(int? estdId, int? distId)
+        public async Task<IEnumerable<GetWorkerRegistrationReportDTO>> GetWorkerRegistrationReportDTO(int? estdId, int? distId, string? independentWorker)
         {
+
             var result = await _dbContext.GetWorkerRegistrationReportDTOs
-              .FromSqlRaw("EXEC [dbo].[SP_GetWorkersReport] @EstdId = {0} , @DistrictId = {1}"
-                   , estdId ?? (object)DBNull.Value, distId ?? (object)DBNull.Value)
-              .ToListAsync();
+              .FromSqlRaw("EXEC [dbo].[SP_GetWorkersReport] @EstdId = {0} , @DistrictId = {1}, @IsIndependentWorker = {2}"
+                   , estdId ?? (object)DBNull.Value
+                   , distId ?? (object)DBNull.Value
+                   , independentWorker ?? (object)DBNull.Value
+                   ).ToListAsync();
+
             return result;
+
         }
 
         public async Task UpdateWorkerRegistrationAsync(T_WorkerRegistrations workerRegistration)

@@ -44,8 +44,12 @@ namespace LMT.Api.Repositories
                 return await _dbContext.T_EstablishmentRegistrations.ToListAsync();
             }
             return await _dbContext.T_EstablishmentRegistrations
-                .Where(c => c.Estd_Name.Contains(searchText) || c.Estd_Reg_No.Contains(searchText) || c.Estd_TradeLicense_No.Contains(searchText))
-                .ToListAsync();
+                .Where(c => c.Estd_Name.Contains(searchText) || 
+                c.Estd_Reg_No!.Contains(searchText) || 
+                c.Estd_TradeLicense_No!.Contains(searchText) ||
+                c.Estd_Owner_Name.Contains(searchText) ||
+                c.Estd_Contact_No.Contains(searchText)
+                ).ToListAsync();
         }
 
         public async Task<T_EstablishmentRegistrations?> GetEstablishmentRegistrationByIdAsync(int establishmentRegistrationId)
