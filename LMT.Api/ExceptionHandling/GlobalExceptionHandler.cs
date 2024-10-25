@@ -35,7 +35,11 @@ namespace LMT.Api.ExceptionHandling
                     problemDetails.Status = (int)HttpStatusCode.Unauthorized;
                     problemDetails.Title = exception.GetType().Name;
                     break;
-
+                case EmailNotConfirmedException:
+                    problemDetails.Status = (int)HttpStatusCode.Forbidden; 
+                    problemDetails.Title = "EmailNotConfirmed";
+                    problemDetails.Detail = exception.Message;
+                    break;
                 //can add more exceptions handler here including custom event handlers
                 default:
                     problemDetails.Status = (int)HttpStatusCode.InternalServerError;

@@ -5,6 +5,7 @@ using LMT.Api.IDGenerators;
 using Microsoft.EntityFrameworkCore;
 using LMT.Api.DTOs;
 using System.Linq;
+using LMT.Api.DTOs.Paging;
 
 namespace LMT.Api.Repositories
 {
@@ -12,18 +13,18 @@ namespace LMT.Api.Repositories
     {
         private readonly EFDBContext _dbContext;
         private readonly UniqueIdGenerator _uniqueIdGenerator;
-
-        public TaskAllocationFormRepository(EFDBContext dbContext)
+        private readonly IConfiguration _configuration;
+        public TaskAllocationFormRepository(EFDBContext dbContext, IConfiguration configuration)
         {
             _dbContext = dbContext;
             _uniqueIdGenerator = new UniqueIdGenerator(_dbContext);
+            _configuration = configuration;
         }
 
         public async Task CreateTaskAllocationFormAsync(T_TaskAllocationForms taskAllocationForm)
         {
             //Generate TaskID
             taskAllocationForm.Task_Id = _uniqueIdGenerator.GenerateUniqueId();
-
             _dbContext.T_TaskAllocationForms.Add(taskAllocationForm);
             await _dbContext.SaveChangesAsync();
         }
@@ -52,7 +53,55 @@ namespace LMT.Api.Repositories
             return await _dbContext.T_TaskAllocationForms
                 .Where(c => c.Task_Name.Contains(searchText) || c.Task_Id.Contains(searchText) || c.Task_Status.Contains(searchText)
                 || c.Task_Creation_Date == date || c.Task_Creation_Date.Year == year || c.Task_Creation_Date.Month == month)
+                .OrderByDescending(x => x.Task_Assigned_Date)
                 .ToListAsync();
+        }
+
+        public async Task<PaginatedResult<T_TaskAllocationForms>> GetTaskAllocationWithPagingAsync(string? userId, string? searchText, int? month, int? year, int pageNumber = 1, int pageSize = 10)
+        {
+            var query = _dbContext.T_TaskAllocationForms.AsQueryable();
+            // Conditionally filter by userId if provided
+            if (!string.IsNullOrEmpty(userId))
+            {
+                query = query.Where(c => c.Task_Assigned_To_Id == userId);  // Assuming there is a UserId property in the model
+            }
+            // Apply search filters if any search text is provided
+            if (!string.IsNullOrEmpty(searchText))
+            {
+                query = query.Where(c => c.Task_Name.Contains(searchText)
+                                         || c.Task_Id.Contains(searchText)
+                                         || c.Task_Status.Contains(searchText)
+                                         || c.Task_Description.Contains(searchText)
+                                         );
+            }
+            // Apply filtering by date, month, and year
+            //if (date != null)
+            //{
+            //    query = query.Where(c => c.Task_Creation_Date == date);
+            //}
+            else
+            {
+                if (year != null)
+                {
+                    query = query.Where(c => c.Task_Creation_Date.Year == year);
+                }
+
+                if (month != null)
+                {
+                    query = query.Where(c => c.Task_Creation_Date.Month == month);
+                }
+            }
+            // Get total record count before pagination
+            int totalRecords = await query.CountAsync();
+
+            // Apply ordering by Task_Assigned_Date in descending order
+            query = query.OrderByDescending(x => x.Task_Assigned_Date);
+
+            // Apply pagination (skip and take)
+            var items = await query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
+
+            // Create and return paginated result
+            return new PaginatedResult<T_TaskAllocationForms>(items, totalRecords, pageNumber, pageSize);
         }
 
         public async Task<IEnumerable<GetTaskAllocationCountDTO>> GetTaskAllocationCountDTOs(string? userId)
@@ -104,7 +153,5 @@ namespace LMT.Api.Repositories
             _dbContext.Entry(taskAllocationForm).State = EntityState.Modified;
             await _dbContext.SaveChangesAsync();
         }
-
-
     }
 }

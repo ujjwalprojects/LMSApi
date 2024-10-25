@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using static Org.BouncyCastle.Crypto.Engines.SM2Engine;
 
 namespace LMT.Api.Controllers.v1
 {
@@ -31,10 +32,10 @@ namespace LMT.Api.Controllers.v1
 
             return Ok(new { Token = token });
         }
-        [HttpPost("forgot-password")]
-        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
+        [HttpPost("forgot-password/{email}")]
+        public async Task<IActionResult> ForgotPassword(string email)
         {
-            var result = await _authService.ForgotPasswordAsync(request.Email);
+            var result = await _authService.ForgotPasswordAsync(email);
             if (!result)
             {
                 return BadRequest(new { message = "User not found" });
@@ -45,13 +46,16 @@ namespace LMT.Api.Controllers.v1
         [HttpPost("reset-password")]
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
         {
-            var result = await _authService.ResetPasswordAsync(request);
-            if (!result)
+            try
             {
-                return BadRequest(new { message = "Failed to reset password" });
+                await _authService.ResetPasswordAsync(request);
+                return Ok("Password reset successful");
             }
-
-            return Ok(new { message = "Password reset successful" });
+            catch (Exception ex)
+            {
+                // Return an appropriate error response
+                return BadRequest(ex.Message);
+            }
         }
         [HttpPost("change-password")]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
@@ -67,8 +71,22 @@ namespace LMT.Api.Controllers.v1
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterRequest registerRequest)
         {
-            await _authService.RegisterAsync(registerRequest);
-            return Ok();
+            var result = await _authService.RegisterAsync(registerRequest);
+            return Ok(result);
+        }
+        [HttpPost("confirm-email")]
+        public async Task<IActionResult> ConfirmEmail([FromQuery] string email, [FromQuery] int code)
+        {
+            try
+            {
+                await _authService.AccountConfirmation(email, code);
+                return Ok("Your email has been confirmed successfully.");
+            }
+            catch (Exception ex)
+            {
+                // Return an appropriate error response
+                return BadRequest(ex.Message);
+            }
         }
         [HttpPost("refresh-token")]
         public async Task<IActionResult> RefreshToken(TokenModel tokenModel)
@@ -92,16 +110,16 @@ namespace LMT.Api.Controllers.v1
             await _authService.RevokeAllAsync();
             return NoContent();
         }
-
         [HttpGet]
         [Route("get-all-users")]
         public async Task<IActionResult> GetAllUsers()
         {
             _logger.LogInformation($"Method GetAllUsers invoked.");
             var users = await _authService.GetUserListAsync();
-            return Ok(users);
+            if (!users.Any()) return NotFound("No users found.");
+            else
+                return Ok(users);
         }
-
         [HttpDelete("delete-user/{userId}")]
         public async Task<IActionResult> DeleteUser(string userId)
         {
@@ -115,7 +133,6 @@ namespace LMT.Api.Controllers.v1
                 return BadRequest(new { message = "Failed to delete user" });
             }
         }
-
         [HttpPut("edit-user")]
         public async Task<IActionResult> EditUser([FromBody] EditUserRequest request)
         {
@@ -133,7 +150,8 @@ namespace LMT.Api.Controllers.v1
             }
 
             // Update user properties
-            user.UserName = request.Username;
+            user.UserFullName = request.Username;
+            user.UserName = request.Username.Split(' ').First().ToLower();
             user.PhoneNumber = request.PhoneNumber;
 
             // Call the repository to edit the user
@@ -145,5 +163,33 @@ namespace LMT.Api.Controllers.v1
 
             return Ok("User updated successfully.");
         }
+        [HttpGet("registered-users/{userId}")]
+        public async Task<IActionResult> GetRegisteredUsers(string userId)
+        {
+            var users = await _authService.GetRegisteredUsersListAsync(userId);
+            if (!users.Any()) return NotFound("No users found.");
+            else
+                return Ok(users);
+        }
+        [HttpPost("send-account-confirmation/{email}")]
+        public async Task<IActionResult> SendReAccountConfirmation(string email)
+        {
+            if (string.IsNullOrEmpty(email))
+            {
+                return BadRequest("Email is required.");
+            }
+
+            try
+            {
+                var result = await _authService.SendReAccountConfirmation(email);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error sending re-account confirmation: {ex.Message}");
+                return StatusCode(500, ex.Message);
+            }
+        }
+
     }
 }

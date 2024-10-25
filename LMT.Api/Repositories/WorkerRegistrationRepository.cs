@@ -20,20 +20,10 @@ namespace LMT.Api.Repositories
 
         public async Task CreateWorkerRegistrationAsync(T_WorkerRegistrations workerRegistration)
         {
-
             workerRegistration.Worker_Reg_Id = _uniqueIdGeneratorWorker.GenerateUniqueId();
-            try
-            {
-                _dbContext.T_WorkerRegistrations.Add(workerRegistration);
-                await _dbContext.SaveChangesAsync();
 
-            }
-            catch (Exception ex)
-            {
-
-                throw;
-            }
-
+            _dbContext.T_WorkerRegistrations.Add(workerRegistration);
+            await _dbContext.SaveChangesAsync();
         }
 
         public async Task DeleteWorkerRegistrationAsync(string workerRegistrationId)
@@ -93,17 +83,7 @@ namespace LMT.Api.Repositories
 
         public async Task UpdateWorkerRegistrationAsync(T_WorkerRegistrations workerRegistration)
         {
-            try
-            {
-
-                _dbContext.Entry(workerRegistration).State = EntityState.Modified;
-                await _dbContext.SaveChangesAsync();
-            }
-            catch (Exception ex)
-            {
-
-                throw;
-            }
+            _dbContext.Entry(workerRegistration).State = EntityState.Modified;
         }
     }
 }

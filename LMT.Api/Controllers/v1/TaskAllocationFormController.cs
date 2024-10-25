@@ -7,6 +7,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using LMT.Api.Repositories;
+using LMT.Api.DTOs.Paging;
+using MailKit.Search;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace LMT.Api.Controllers.v1
 {
@@ -46,12 +49,35 @@ namespace LMT.Api.Controllers.v1
             return Ok(_mapper.Map<List<T_TaskAllocationFormsDTO>>(taskAllocationForms));
         }
 
+        [HttpGet("task-list-paging")]
+        public async Task<IActionResult> GetTaskAllocationWithPaging(string? userId, string? searchText, int? month, int? year, DateTime? date, int pageNumber = 1, int pageSize = 10)
+        {
+            try
+            {
+                var result = await _taskAllocationFormRepository.GetTaskAllocationWithPagingAsync(userId, searchText, month, year, pageNumber, pageSize);
+
+                if (result.Items.Any())
+                {
+                    return Ok(result); // Return 200 OK with the paginated result
+                }
+                else
+                {
+                    return NotFound("No tasks found for the specified filters.");
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log the exception (assumed that ILogger is injected)
+                return StatusCode(StatusCodes.Status500InternalServerError, $"Error retrieving task allocations: {ex.Message}");
+            }
+        }
+
         // GET: api/TaskAllocationForm/id
         [HttpGet("{id}")]
         public async Task<ActionResult<T_TaskAllocationFormsDTO>> GetTaskAllocationForm(string id)
         {
 
-            
+
             _logger.LogInformation($"Method GetTaskAllocationForm({id}) invoked.");
 
             var taskAllocationForm = await _taskAllocationFormRepository.GetTaskAllocationFormByIdAsync(id);
@@ -117,7 +143,7 @@ namespace LMT.Api.Controllers.v1
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteTaskAllocationForm(string id)
         {
-            
+
             _logger.LogInformation($"Method DeleteTaskAllocationForm({id}) invoked.");
 
             var taskAllocationForm = await _taskAllocationFormRepository.GetTaskAllocationFormByIdAsync(id);
@@ -141,7 +167,7 @@ namespace LMT.Api.Controllers.v1
         public async Task<ActionResult<IEnumerable<GetTaskWorkersMapDTO>>> GetTaskWorkerMap(string taskId, string? searchText)
         {
             _logger.LogInformation("Method GetTaskWorkerMap invoked.");
-          
+
             var taskWorkersMap = await _taskAllocationFormRepository.getTaskWorkersMapDTOsAsync(taskId, searchText);
             return Ok(taskWorkersMap);
         }
@@ -158,7 +184,5 @@ namespace LMT.Api.Controllers.v1
             return Ok(result);
         }
 
-
-        
     }
 }

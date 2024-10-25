@@ -13,6 +13,7 @@ using Microsoft.OpenApi.Models;
 using Serilog;
 using System.Text;
 
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -63,9 +64,24 @@ builder.Services.AddDbContext<AppDBContext>(options =>
     options.UseSqlServer(sqlConnectionStr));
 
 //AUTHENTICATION SERVICE
-builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
-    .AddEntityFrameworkStores<AppDBContext>()
-    .AddDefaultTokenProviders();
+//builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
+//    .AddEntityFrameworkStores<AppDBContext>()
+//    .AddDefaultTokenProviders();
+
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+{
+    options.SignIn.RequireConfirmedEmail = true;
+    options.Tokens.EmailConfirmationTokenProvider = TokenOptions.DefaultEmailProvider;
+    options.Tokens.PasswordResetTokenProvider = TokenOptions.DefaultEmailProvider;
+  
+})
+.AddEntityFrameworkStores<AppDBContext>()
+.AddDefaultTokenProviders();
+
+builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
+{
+    options.TokenLifespan = TimeSpan.FromMinutes(60); 
+});
 
 //REGISTER SERVICES
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -115,6 +131,8 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+
+
 //GLOBAL EXCEPTION HANDLER
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
@@ -135,6 +153,9 @@ builder.Services.AddApiVersioning(options =>
     options.SubstituteApiVersionInUrl = true; // Corrected this line
 });
 
+
+
+
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
@@ -154,7 +175,7 @@ app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
-
+app.UseStaticFiles();
 app.MapControllers();
 app.UseExceptionHandler(opt => { });
 

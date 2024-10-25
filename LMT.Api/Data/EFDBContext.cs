@@ -22,17 +22,15 @@ namespace LMT.Api.Data
         public DbSet<T_WorkerRegistrations> T_WorkerRegistrations { get; set; }
         public DbSet<T_UniqueCodeRecords> T_UniqueCodeRecords { get; set; }
         public DbSet<T_UniqueCodeRecordsForWorkers> T_UniqueCodeRecordsForWorkers { get; set; }
-
         public DbSet<GetT_WorkerRegistrationDTO> GetT_WorkerRegistrationDTO { get; set; }
         public DbSet<GetTaskWorkersMapDTO> GetTaskWorkersMapDTO { get; set; }
-
         public DbSet<T_TaskWorkerMappers> T_TaskWorkerMappers { get; set; }
-
         public DbSet<GetEstablishmentCountDTO> GetEstablishmentCountDTOs { get; set; }
         public DbSet<GetWorkerRegistrationCountDTO> GetWorkerRegistrationCountDTOs { get; set; }
         public DbSet<GetTaskAllocationCountDTO> GetTaskAllocationCountDTOs { get; set; }
         public DbSet<GetWorkerRegistrationReportDTO> GetWorkerRegistrationReportDTOs { get; set; }
         public DbSet<GetEstablishmentRegistrationReportDTO> GetEstablishmentRegistrationReportDTOs { get; set; }
+        public DbSet<GetRegisteredFieldOfficersDTO> GetRegisteredFieldOfficersDTOs { get; set; }
 
 
 
@@ -46,6 +44,7 @@ namespace LMT.Api.Data
             modelBuilder.Entity<GetTaskAllocationCountDTO>().HasNoKey();
             modelBuilder.Entity<GetWorkerRegistrationReportDTO>().HasNoKey();
             modelBuilder.Entity<GetEstablishmentRegistrationReportDTO>().HasNoKey();
+            modelBuilder.Entity<GetRegisteredFieldOfficersDTO>().HasNoKey();
 
             // Other entity configurations
             base.OnModelCreating(modelBuilder);
