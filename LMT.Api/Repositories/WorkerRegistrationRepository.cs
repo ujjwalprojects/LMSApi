@@ -4,6 +4,9 @@ using LMT.Api.Entities;
 using LMT.Api.Data;
 using Microsoft.EntityFrameworkCore;
 using LMT.Api.IDGenerators;
+using LMT.Api.DTOs.Paging;
+using Microsoft.Data.SqlClient;
+using System.Data;
 
 namespace LMT.Api.Repositories
 {
@@ -52,6 +55,27 @@ namespace LMT.Api.Repositories
            .FromSqlRaw("EXEC [dbo].[SP_GetWorkerRegistrationsWithSearch] @SearchTerm = {0}", searchText ?? (object)DBNull.Value)
            .ToListAsync();
             return result;
+        }
+
+        public async Task<PaginatedResult<GetT_WorkerRegistrationDTO>> GetWorkerWithPagingAsync(string? userId, string? searchText, int pageNumber = 1, int pageSize = 10)
+        {
+            var totalRecordCountParam = new SqlParameter("@TotalRecordCount", SqlDbType.Int)
+            {
+                Direction = ParameterDirection.Output
+            };
+
+            var items = await _dbContext.GetT_WorkerRegistrationDTO
+             .FromSqlRaw("EXEC SP_GetWorkerRegistrationsWithPaging @UserId = {0}, @SearchText = {1}, " +
+             "@PageNumber = {2}, @PageSize = {3}, @TotalRecordCount = {4} OUTPUT",
+
+             userId ?? (object)DBNull.Value, searchText ?? (object)DBNull.Value,
+             pageNumber, pageSize, totalRecordCountParam)
+
+             .ToListAsync();
+
+            int totalRecordCount = (int)(totalRecordCountParam.Value ?? 0);
+
+            return new PaginatedResult<GetT_WorkerRegistrationDTO>(items, totalRecordCount, pageNumber, pageSize);
         }
 
         public async Task<T_WorkerRegistrations?> GetWorkerRegistrationByIdAsync(string workerRegistrationId)

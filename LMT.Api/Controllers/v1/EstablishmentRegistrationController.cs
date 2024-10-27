@@ -44,6 +44,29 @@ namespace LMT.Api.Controllers.v1
             return Ok(_mapper.Map<List<GetT_EstablishmentDTO>>(establishmentRegistrations));
         }
 
+        [HttpGet("establishment-list-paging")]
+        public async Task<IActionResult> GetEstablishmentWithPaging(string? userId, string? searchText,int pageNumber = 1, int pageSize = 10)
+        {
+            try
+            {
+                var result = await _establishmentRegistrationRepository.GetEstablishmentWithPagingAsync(userId, searchText, pageNumber, pageSize);
+
+                if (result.Items.Any())
+                {
+                    return Ok(result); // Return 200 OK with the paginated result
+                }
+                else
+                {
+                    return NotFound("No record found for the specified filters.");
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log the exception (assumed that ILogger is injected)
+                return StatusCode(StatusCodes.Status500InternalServerError, $"Error retrieving task allocations: {ex.Message}");
+            }
+        }
+
         [HttpGet("establishment-count")]
         public async Task<ActionResult<IEnumerable<GetEstablishmentCountDTO>>> GetEstablishmentCount(string? userId)
         {

@@ -6,6 +6,9 @@ using Microsoft.EntityFrameworkCore;
 using LMT.Api.DTOs;
 using System.Linq;
 using LMT.Api.DTOs.Paging;
+using Microsoft.Data.SqlClient;
+using System.Data;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace LMT.Api.Repositories
 {
@@ -59,49 +62,22 @@ namespace LMT.Api.Repositories
 
         public async Task<PaginatedResult<T_TaskAllocationForms>> GetTaskAllocationWithPagingAsync(string? userId, string? searchText, int? month, int? year, int pageNumber = 1, int pageSize = 10)
         {
-            var query = _dbContext.T_TaskAllocationForms.AsQueryable();
-            // Conditionally filter by userId if provided
-            if (!string.IsNullOrEmpty(userId))
+            var totalRecordCountParam = new SqlParameter("@TotalRecordCount", SqlDbType.Int)
             {
-                query = query.Where(c => c.Task_Assigned_To_Id == userId);  // Assuming there is a UserId property in the model
-            }
-            // Apply search filters if any search text is provided
-            if (!string.IsNullOrEmpty(searchText))
-            {
-                query = query.Where(c => c.Task_Name.Contains(searchText)
-                                         || c.Task_Id.Contains(searchText)
-                                         || c.Task_Status.Contains(searchText)
-                                         || c.Task_Description.Contains(searchText)
-                                         );
-            }
-            // Apply filtering by date, month, and year
-            //if (date != null)
-            //{
-            //    query = query.Where(c => c.Task_Creation_Date == date);
-            //}
-            else
-            {
-                if (year != null)
-                {
-                    query = query.Where(c => c.Task_Creation_Date.Year == year);
-                }
+                Direction = ParameterDirection.Output
+            };
 
-                if (month != null)
-                {
-                    query = query.Where(c => c.Task_Creation_Date.Month == month);
-                }
-            }
-            // Get total record count before pagination
-            int totalRecords = await query.CountAsync();
+            var items = await _dbContext.T_TaskAllocationForms
+                    .FromSqlRaw("EXEC GetTaskAllocationsWithPaging @UserId = {0}, @SearchText = {1}, " +
+                    "@Month = {2}, @Year = {3}, @PageNumber = {4}, @PageSize = {5}, @TotalRecordCount = {6} OUTPUT",
 
-            // Apply ordering by Task_Assigned_Date in descending order
-            query = query.OrderByDescending(x => x.Task_Assigned_Date);
+                                userId ?? (object)DBNull.Value, searchText ?? (object)DBNull.Value, 
+                                month ?? (object)DBNull.Value, year ?? (object)DBNull.Value, pageNumber, pageSize, totalRecordCountParam)
+                    .ToListAsync();
 
-            // Apply pagination (skip and take)
-            var items = await query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
+            int totalRecordCount = (int)(totalRecordCountParam.Value ?? 0);
 
-            // Create and return paginated result
-            return new PaginatedResult<T_TaskAllocationForms>(items, totalRecords, pageNumber, pageSize);
+            return new PaginatedResult<T_TaskAllocationForms>(items, totalRecordCount, pageNumber, pageSize);
         }
 
         public async Task<IEnumerable<GetTaskAllocationCountDTO>> GetTaskAllocationCountDTOs(string? userId)
@@ -151,6 +127,28 @@ namespace LMT.Api.Repositories
         public async Task UpdateTaskAllocationFormAsync(T_TaskAllocationForms taskAllocationForm)
         {
             _dbContext.Entry(taskAllocationForm).State = EntityState.Modified;
+            await _dbContext.SaveChangesAsync();
+        }
+
+        public async Task SaveTaskAllocationFormAsync(T_TaskAllocationForms taskAllocationForm, FIleUploadDTO file)
+        {
+            var folderName = Path.Combine("SiteImage", "Uploads");
+            var pathToSave = Path.Combine(Directory.GetCurrentDirectory(), folderName);
+            if(!Directory.Exists(pathToSave)) Directory.CreateDirectory(pathToSave);
+
+            var fileName = file.File.FileName;
+            var fullPath = Path.Combine(pathToSave, fileName); 
+            var dbPath = Path.Combine(folderName, fileName);
+           
+
+            using (var stream = new FileStream(fullPath, FileMode.Create))
+            {
+                file.File.CopyTo(stream);
+            }
+
+            taskAllocationForm.Task_Id = _uniqueIdGenerator.GenerateUniqueId();
+            taskAllocationForm.Task_Site_Image = dbPath;
+            _dbContext.T_TaskAllocationForms.Add(taskAllocationForm);
             await _dbContext.SaveChangesAsync();
         }
     }

@@ -1,4 +1,5 @@
 ﻿using LMT.Api.DTOs;
+using LMT.Api.DTOs.Paging;
 using LMT.Api.Entities;
 using System.Collections.Generic;
 
@@ -14,6 +15,7 @@ namespace LMT.Api.Interfaces
         Task DeleteEstablishmentRegistrationAsync(int establishmentRegistrationId);
         Task <IEnumerable<GetEstablishmentCountDTO>> GetEstablishmentCountDTOs(string? userId);
         Task<IEnumerable<GetEstablishmentRegistrationReportDTO>> GetEstablishmentRegistrationReportDTO(int? distId);
+        Task<PaginatedResult<T_EstablishmentRegistrations>> GetEstablishmentWithPagingAsync(string? userId, string? searchText, int pageNumber = 1, int pageSize = 10);
     }
 
 }

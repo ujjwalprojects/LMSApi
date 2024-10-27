@@ -3,6 +3,9 @@ using LMT.Api.Entities;
 using LMT.Api.Data;
 using Microsoft.EntityFrameworkCore;
 using LMT.Api.DTOs;
+using LMT.Api.DTOs.Paging;
+using Microsoft.Data.SqlClient;
+using System.Data;
 
 namespace LMT.Api.Repositories
 {
@@ -44,11 +47,11 @@ namespace LMT.Api.Repositories
                 return await _dbContext.T_EstablishmentRegistrations.ToListAsync();
             }
             return await _dbContext.T_EstablishmentRegistrations
-                .Where(c => c.Estd_Name.Contains(searchText) || 
-                c.Estd_Reg_No!.Contains(searchText) || 
-                c.Estd_TradeLicense_No!.Contains(searchText) ||
+                .Where(c => c.Estd_Name.Contains(searchText) ||
                 c.Estd_Owner_Name.Contains(searchText) ||
-                c.Estd_Contact_No.Contains(searchText)
+                c.Estd_Contact_No.Contains(searchText) ||
+                c.Estd_Reg_No!.Contains(searchText) ||
+                c.Estd_TradeLicense_No!.Contains(searchText)
                 ).ToListAsync();
         }
 
@@ -59,7 +62,7 @@ namespace LMT.Api.Repositories
 
         public async Task<IEnumerable<GetEstablishmentCountDTO>> GetEstablishmentCountDTOs(string? userId)
         {
-            var result =  await _dbContext.GetEstablishmentCountDTOs
+            var result = await _dbContext.GetEstablishmentCountDTOs
             .FromSqlRaw("EXEC [dbo].[SP_GetEstablishmentCountForDashboard] @UserID = {0}", userId ?? (object)DBNull.Value)
            .ToListAsync();
             return result;
@@ -78,6 +81,27 @@ namespace LMT.Api.Repositories
                    , distId ?? (object)DBNull.Value)
               .ToListAsync();
             return result;
+        }
+
+        public async Task<PaginatedResult<T_EstablishmentRegistrations>> GetEstablishmentWithPagingAsync(string? userId, string? searchText, int pageNumber = 1, int pageSize = 10)
+        {
+            var totalRecordCountParam = new SqlParameter("@TotalRecordCount", SqlDbType.Int)
+            {
+                Direction = ParameterDirection.Output
+            };
+
+            var items = await _dbContext.T_EstablishmentRegistrations
+             .FromSqlRaw("EXEC GetEstablishmentWithPaging @UserId = {0}, @SearchText = {1}, " +
+             "@PageNumber = {2}, @PageSize = {3}, @TotalRecordCount = {4} OUTPUT",
+
+             userId ?? (object)DBNull.Value, searchText ?? (object)DBNull.Value,
+             pageNumber, pageSize, totalRecordCountParam)
+
+             .ToListAsync();
+
+            int totalRecordCount = (int)(totalRecordCountParam.Value ?? 0);
+
+            return new PaginatedResult<T_EstablishmentRegistrations>(items, totalRecordCount, pageNumber, pageSize);
         }
     }
 }

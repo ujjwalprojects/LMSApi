@@ -5,6 +5,7 @@ using LMT.Api.Interfaces;
 using LMT.Api.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using LMT.Api.Repositories;
 
 namespace LMT.Api.Controllers.v1
 {
@@ -42,6 +43,28 @@ namespace LMT.Api.Controllers.v1
             var workerRegistrations = await _workerRegistrationRepository.GetAllWorkerRegistrationsAsync(searchText);
             return Ok(workerRegistrations);
         }
+        [HttpGet("worker-list-paging")]
+        public async Task<IActionResult> GetWorkerWithPaging(string? userId, string? searchText, int pageNumber = 1, int pageSize = 10)
+        {
+            try
+            {
+                var result = await _workerRegistrationRepository.GetWorkerWithPagingAsync(userId, searchText, pageNumber, pageSize);
+
+                if (result.Items.Any())
+                {
+                    return Ok(result); // Return 200 OK with the paginated result
+                }
+                else
+                {
+                    return NotFound("No record found for the specified filters.");
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log the exception (assumed that ILogger is injected)
+                return StatusCode(StatusCodes.Status500InternalServerError, $"Error retrieving task allocations: {ex.Message}");
+            }
+        }
         // GET: api/WorkerRegistration/id
         [HttpGet("{id}")]
         public async Task<ActionResult<T_WorkerRegistrationsDTO>> GetWorkerRegistration(string id)
@@ -55,7 +78,6 @@ namespace LMT.Api.Controllers.v1
             }
             return Ok(_mapper.Map<T_WorkerRegistrationsDTO>(workerRegistration));
         }
-
         // POST: api/WorkerRegistration
         [HttpPost]
         public async Task<ActionResult<T_WorkerRegistrationsDTO>> PostWorkerRegistration(T_WorkerRegistrationsDTO workerRegistrationDto)
@@ -67,7 +89,6 @@ namespace LMT.Api.Controllers.v1
 
             return CreatedAtAction(nameof(GetWorkerRegistration), new { id = workerRegistration.Worker_Reg_Id }, _mapper.Map<T_WorkerRegistrationsDTO>(workerRegistration));
         }
-
         // PUT: api/WorkerRegistration/id
         [HttpPut]
         public async Task<IActionResult> PutWorkerRegistration(T_WorkerRegistrationsDTO workerRegistrationDto)
@@ -98,7 +119,6 @@ namespace LMT.Api.Controllers.v1
 
             return NoContent();
         }
-
         // DELETE: api/WorkerRegistration/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteWorkerRegistration(string id)
@@ -115,7 +135,6 @@ namespace LMT.Api.Controllers.v1
 
             return NoContent();
         }
-
         [HttpGet("worker-registration-count")]
         public async Task<ActionResult<IEnumerable<GetWorkerRegistrationCountDTO>>> GetWorkersRegistrationCount(string? userId)
         {
@@ -127,7 +146,6 @@ namespace LMT.Api.Controllers.v1
 
             return Ok(result);
         }
-
         [HttpGet("worker-registration-report")]
         public async Task<ActionResult<IEnumerable<GetWorkerRegistrationReportDTO>>> GetWorkerRegistrationReport(int? estdId, int? distId, string? independentWorker)
         {

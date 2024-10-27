@@ -17,6 +17,7 @@ namespace LMT.Api.Interfaces
         Task <IEnumerable<GetTaskWorkersMapDTO>> getTaskWorkersMapDTOsAsync(string taskId, string? searchText);
         Task<IEnumerable<GetTaskAllocationCountDTO>> GetTaskAllocationCountDTOs(string? userId);
         Task<PaginatedResult<T_TaskAllocationForms>> GetTaskAllocationWithPagingAsync(string? userId, string? searchText, int? month, int? year, int pageNumber = 1, int pageSize = 10);
+        Task SaveTaskAllocationFormAsync(T_TaskAllocationForms taskAllocationForm, FIleUploadDTO fIle);
     }
 
 }

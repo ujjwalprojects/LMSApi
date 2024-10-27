@@ -50,7 +50,7 @@ namespace LMT.Api.Controllers.v1
         }
 
         [HttpGet("task-list-paging")]
-        public async Task<IActionResult> GetTaskAllocationWithPaging(string? userId, string? searchText, int? month, int? year, DateTime? date, int pageNumber = 1, int pageSize = 10)
+        public async Task<IActionResult> GetTaskAllocationWithPaging(string? userId, string? searchText, int? month, int? year, int pageNumber = 1, int pageSize = 10)
         {
             try
             {
@@ -62,7 +62,7 @@ namespace LMT.Api.Controllers.v1
                 }
                 else
                 {
-                    return NotFound("No tasks found for the specified filters.");
+                    return NotFound("No record found for the specified filters.");
                 }
             }
             catch (Exception ex)
@@ -72,7 +72,7 @@ namespace LMT.Api.Controllers.v1
             }
         }
 
-        // GET: api/TaskAllocationForm/id
+       
         [HttpGet("{id}")]
         public async Task<ActionResult<T_TaskAllocationFormsDTO>> GetTaskAllocationForm(string id)
         {
@@ -88,7 +88,7 @@ namespace LMT.Api.Controllers.v1
             return Ok(_mapper.Map<T_TaskAllocationFormsDTO>(taskAllocationForm));
         }
 
-        // POST: api/TaskAllocationForm
+        
         [HttpPost]
         public async Task<ActionResult<T_TaskAllocationFormsDTO>> PostTaskAllocationForm(T_TaskAllocationFormsDTO taskAllocationFormDto)
         {
@@ -96,6 +96,17 @@ namespace LMT.Api.Controllers.v1
 
             var taskAllocationForm = _mapper.Map<T_TaskAllocationForms>(taskAllocationFormDto);
             await _taskAllocationFormRepository.CreateTaskAllocationFormAsync(taskAllocationForm);
+
+            return CreatedAtAction(nameof(GetTaskAllocationForm), new { id = taskAllocationForm.Task_Id }, _mapper.Map<T_TaskAllocationFormsDTO>(taskAllocationForm));
+        }
+
+        [HttpPost("save-task-form")]
+        public async Task<ActionResult<T_TaskAllocationFormsDTO>> PostTaskAllocationFormWithFile([FromForm] T_TaskAllocationFormsDTO taskAllocationFormDto, [FromForm] FIleUploadDTO fileUploadDto)
+        {
+            _logger.LogInformation("Method PostTaskAllocationForm invoked.");
+
+            var taskAllocationForm = _mapper.Map<T_TaskAllocationForms>(taskAllocationFormDto);
+            await _taskAllocationFormRepository.SaveTaskAllocationFormAsync(taskAllocationForm, fileUploadDto);
 
             return CreatedAtAction(nameof(GetTaskAllocationForm), new { id = taskAllocationForm.Task_Id }, _mapper.Map<T_TaskAllocationFormsDTO>(taskAllocationForm));
         }

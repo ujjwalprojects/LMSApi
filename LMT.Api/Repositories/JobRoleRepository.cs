@@ -25,17 +25,10 @@ namespace LMT.Api.Repositories
             var jobRole = await _dbContext.M_JobRoles.FindAsync(jobRoleId);
             if (jobRole != null)
             {
-                try
-                {
+                
                     _dbContext.M_JobRoles.Remove(jobRole);
                     await _dbContext.SaveChangesAsync();
 
-                }
-                catch (Exception ex)
-                {
-
-                    throw;
-                }
             }
         }
 
