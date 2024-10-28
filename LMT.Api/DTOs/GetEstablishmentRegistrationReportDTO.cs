@@ -14,5 +14,6 @@
         public string Estd_Remarks { get; set; }
         public string Estd_Description { get; set; }
         public string Estd_IsRegistered { get; set; }
+        public string District_Name { get; set; }
     }
 }
