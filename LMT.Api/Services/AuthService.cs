@@ -77,6 +77,7 @@ namespace LMT.Api.Services
             bool sendVerificationCodeEmail = await SendVerificationCodeEmailAsync(user, emailCode);
             if (!sendLoginDetailsEmail && !sendVerificationCodeEmail)
             {
+                
                 await _userManager.RemoveFromRoleAsync(user, "FIELD_OFFICER");
                 await _userManager.DeleteAsync(user);
 

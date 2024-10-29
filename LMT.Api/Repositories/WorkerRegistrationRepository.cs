@@ -108,6 +108,7 @@ namespace LMT.Api.Repositories
         public async Task UpdateWorkerRegistrationAsync(T_WorkerRegistrations workerRegistration)
         {
             _dbContext.Entry(workerRegistration).State = EntityState.Modified;
+            await _dbContext.SaveChangesAsync();
         }
     }
 }
