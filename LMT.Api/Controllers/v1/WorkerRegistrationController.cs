@@ -104,12 +104,13 @@ namespace LMT.Api.Controllers.v1
             try
             {
                 await _workerRegistrationRepository.UpdateWorkerRegistrationAsync(workerRegistration);
+                return Ok();
             }
             catch (DbUpdateConcurrencyException)
             {
                 if (!await WorkerRegistrationExists(workerRegistrationDto.Worker_Reg_Id))
                 {
-                    return NotFound();
+                    return NotFound("Record Updated Successfully.");
                 }
                 else
                 {
